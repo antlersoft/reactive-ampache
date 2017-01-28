@@ -70,7 +70,7 @@ public enum AmpacheApi {
      * @param ampachePassword   ampache user password
      * @return                  an observable that will complete if the user is valid otherwise goes onError
      */
-    public Observable<AmpacheSession> initUser(final String ampacheUrl, String ampacheUser, String ampachePassword) {
+    public Observable<AmpacheSession> initUser(final String ampacheUrl, final String ampacheUser, final String ampachePassword) {
         return Observable.create(new OnSubscribe<AmpacheSession>() {
 
             @Override
@@ -243,7 +243,7 @@ public enum AmpacheApi {
     /**
      * get the album from the album id
      */
-    public Observable<Album> getAlbumFromId(String albumId) {
+    public Observable<Album> getAlbumFromId(final String albumId) {
         return Observable.create(new OnSubscribe<Album>() {
 
             @Override
@@ -267,7 +267,7 @@ public enum AmpacheApi {
     /**
      * get artist from artist id
      */
-    public Observable<Artist> getArtistFromId(String artistId) {
+    public Observable<Artist> getArtistFromId(final String artistId) {
         return Observable.create(new OnSubscribe<Artist>() {
 
             @Override
