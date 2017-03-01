@@ -21,6 +21,9 @@ import android.content.Context;
 import java.io.IOException;
 import java.util.List;
 
+import com.antoniotari.reactiveampache.models.Tag;
+import com.antoniotari.reactiveampache.models.TagEntity;
+import com.antoniotari.reactiveampache.models.TagsResponse;
 import com.google.gson.Gson;
 
 import com.antoniotari.reactiveampache.Exceptions.AmpacheApiException;
@@ -373,6 +376,31 @@ public enum AmpacheApi {
     /**
      * get a list of songs from given album
      */
+    public Observable<List<TagEntity>> getTags() {
+        return Observable.create(new OnSubscribe<List<TagEntity>>() {
+
+            @Override
+            public void call(final Subscriber<? super List<TagEntity>> subscriber) {
+                try {
+                    TagsResponse songssResponse =
+                            getRawRequest().getTags(AmpacheSession.INSTANCE.getHandshakeResponse().getAuth());
+                    if (songssResponse.getError()!=null) throw new AmpacheApiException(songssResponse.getError());
+                    subscriber.onNext(songssResponse.getTags());
+                    subscriber.onCompleted();
+                } catch (Exception e) {
+                    subscriber.onError(e);
+                }
+            }
+        })
+                .doOnError(doOnError)
+                .retry(9)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    /**
+     * get a list of songs from given album
+     */
     public Observable<List<Playlist>> getPlaylists() {
         return Observable.create(new OnSubscribe<List<Playlist>>() {
 
@@ -391,6 +419,56 @@ public enum AmpacheApi {
         })
                 .doOnError(doOnError)
                 .retry(9)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    /**
+     * get a list of songs from given album
+     */
+    public Observable<List<Song>> getTagSongs(final String tagId) {
+        return Observable.create(new OnSubscribe<List<Song>>() {
+
+            @Override
+            public void call(final Subscriber<? super List<Song>> subscriber) {
+                try {
+                    SongsResponse songsResponse =
+                            getRawRequest().getTagSongs(AmpacheSession.INSTANCE.getHandshakeResponse().getAuth(), tagId);
+                    if (songsResponse.getError()!=null) throw new AmpacheApiException(songsResponse.getError());
+                    subscriber.onNext(songsResponse.getSongs());
+                    subscriber.onCompleted();
+                } catch (Exception e) {
+                    subscriber.onError(e);
+                }
+            }
+        })
+                .doOnError(doOnError)
+                .retry(9)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<Song> getSong(final String songId) {
+        return Observable.create(new OnSubscribe<Song>() {
+            @Override
+            public void call(final Subscriber<? super Song> subscriber){
+                try {
+                    SongsResponse songsResponse =
+                            getRawRequest().getSong(AmpacheSession.INSTANCE.getHandshakeResponse().getAuth(), songId);
+                    if (songsResponse.getError() != null) throw new AmpacheApiException(songsResponse.getError());
+                    Song result = null;
+                    if (songsResponse.getSongs()!=null && songsResponse.getSongs().size() > 0) {
+                        result = songsResponse.getSongs().get(0);
+                    }
+                    subscriber.onNext(result);
+                    subscriber.onCompleted();
+                } catch (Exception e) {
+                    subscriber.onError(e);
+                }
+            }
+        })
+                .doOnError(doOnError)
+                .retry(2)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }

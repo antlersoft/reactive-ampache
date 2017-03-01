@@ -18,7 +18,9 @@ import com.antoniotari.reactiveampache.models.ArtistsResponse;
 import com.antoniotari.reactiveampache.models.HandshakeResponse;
 import com.antoniotari.reactiveampache.models.PingResponse;
 import com.antoniotari.reactiveampache.models.PlaylistsResponse;
+import com.antoniotari.reactiveampache.models.Song;
 import com.antoniotari.reactiveampache.models.SongsResponse;
+import com.antoniotari.reactiveampache.models.TagsResponse;
 import com.antoniotari.reactiveampache.utils.AmpacheUtils;
 import com.antoniotari.reactiveampache.utils.SerializeUtils;
 
@@ -210,13 +212,19 @@ public class RawRequest {
         return new SerializeUtils().fromXml(respStr, SongsResponse.class);
     }
 
+    public TagsResponse getTagsX(final String auth) throws Exception {
+        String playlistQuery = "auth=" + auth + "&action=tags";
+        final String respStr = getRequest(playlistQuery, Timeout.MEDIUM_TIMEOUT);
+        return new SerializeUtils().fromXml(respStr, TagsResponse.class);
+    }
+
     public PlaylistsResponse getPlaylists(final String auth) throws Exception {
         String playlistQuery = "auth=" + auth + "&action=playlists";
         final String respStr = getRequest(playlistQuery, Timeout.MEDIUM_TIMEOUT);
         return new SerializeUtils().fromXml(respStr, PlaylistsResponse.class);
     }
 
-    public PlaylistsResponse getPlaylist(final String auth, final String playlistId) throws Exception {
+        public PlaylistsResponse getPlaylist(final String auth, final String playlistId) throws Exception {
         String playlistQuery = "auth=" + auth +
                 "&filter=" + playlistId +
                 "&action=playlist";
@@ -232,9 +240,25 @@ public class RawRequest {
         return new SerializeUtils().fromXml(respStr, SongsResponse.class);
     }
 
-    public SongsResponse getTags(final String auth) throws Exception {
+    public SongsResponse getSong(final String auth, final String id) throws Exception {
+        String playlistQuery = "auth=" + auth +
+                "&filter=" +id +
+                "&action=song";
+        final String respStr = getRequest(playlistQuery, Timeout.SHORT_TIMEOUT);
+        return new SerializeUtils().fromXml(respStr, SongsResponse.class);
+    }
+
+    public TagsResponse getTags(final String auth) throws Exception {
         String playlistQuery = "auth=" + auth +
                 "&action=tags";
+        final String respStr = getRequest(playlistQuery, Timeout.SHORT_TIMEOUT);
+        return new SerializeUtils().fromXml(respStr, TagsResponse.class);
+    }
+
+    public SongsResponse getTagSongs(final String auth, String tagId) throws Exception {
+        String playlistQuery = "auth=" + auth +
+                "&filter=" + tagId +
+                "&action=tag_songs";
         final String respStr = getRequest(playlistQuery, Timeout.SHORT_TIMEOUT);
         return new SerializeUtils().fromXml(respStr, SongsResponse.class);
     }
