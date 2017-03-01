@@ -10,10 +10,15 @@ import java.util.List;
 
 public class TagsResponse extends BaseResponse {
 
-    @ElementList(inline = true, required = false)
+    @ElementList(entry="tag", inline = true, required = false)
     private List<TagEntity> tags;
 
     public List<TagEntity> getTags() {
         return tags;
     }
+
+    /**
+     * Required for deserialization?
+     */
+    public TagsResponse() {}
 }
