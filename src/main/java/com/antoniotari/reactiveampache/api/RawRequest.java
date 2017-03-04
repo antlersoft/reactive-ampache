@@ -232,6 +232,14 @@ public class RawRequest {
         return new SerializeUtils().fromXml(respStr, PlaylistsResponse.class);
     }
 
+    public SongsResponse getArtistSongs(final String auth, final String artistId) throws Exception {
+        String playlistQuery = "auth=" + auth +
+                "&filter=" + artistId +
+                "&action=artist_songs";
+        final String respStr = getRequest(playlistQuery, Timeout.MEDIUM_TIMEOUT);
+        return new SerializeUtils().fromXml(respStr, SongsResponse.class);
+    }
+
     public SongsResponse getPlaylistSongs(final String auth, final String playlistId) throws Exception {
         String playlistQuery = "auth=" + auth +
                 "&filter=" + playlistId +

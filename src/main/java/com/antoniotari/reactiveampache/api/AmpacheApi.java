@@ -21,7 +21,6 @@ import android.content.Context;
 import java.io.IOException;
 import java.util.List;
 
-import com.antoniotari.reactiveampache.models.Tag;
 import com.antoniotari.reactiveampache.models.TagEntity;
 import com.antoniotari.reactiveampache.models.TagsResponse;
 import com.google.gson.Gson;
@@ -160,19 +159,13 @@ public enum AmpacheApi {
             @Override
             public void call(final Subscriber<? super List<Artist>> subscriber) {
                 try {
-                    ArtistsResponse artistsResponseCached = getCached(FILENAME_ARTISTS, ArtistsResponse.class);
-                    if (artistsResponseCached != null && artistsResponseCached.getError() == null &&
-                            artistsResponseCached.getArtists() != null) {
-                        subscriber.onNext(artistsResponseCached.getArtists());
-                    }
 
-                    ArtistsResponse artistsResponse = getRawRequest().getArtists(AmpacheSession.INSTANCE.getHandshakeResponse().getAuth());
-                    if (artistsResponse.getError() != null) throw new AmpacheApiException(artistsResponse.getError());
+                        ArtistsResponse artistsResponse = getRawRequest().getArtists(AmpacheSession.INSTANCE.getHandshakeResponse().getAuth());
+                        if (artistsResponse.getError() != null)
+                            throw new AmpacheApiException(artistsResponse.getError());
 
-                    if (checkAndCache(FILENAME_ARTISTS, artistsResponse, artistsResponseCached)) {
-                        subscriber.onNext(artistsResponse.getArtists());
-                    }
 
+                    subscriber.onNext(artistsResponse.getArtists());
                     subscriber.onCompleted();
                 } catch (Exception e) {
                     subscriber.onError(e);
@@ -219,18 +212,13 @@ public enum AmpacheApi {
             @Override
             public void call(final Subscriber<? super List<Album>> subscriber) {
                 try {
-                    AlbumsResponse albumsResponseCached = getCached(FILENAME_ALBUMS, AlbumsResponse.class);
-                    if (albumsResponseCached != null && albumsResponseCached.getError() == null) {
-                        subscriber.onNext(albumsResponseCached.getAlbums());
-                    }
 
-                    AlbumsResponse albumsResponse = getRawRequest().getAlbums(AmpacheSession.INSTANCE.getHandshakeResponse().getAuth());
-                    if (albumsResponse.getError() != null) throw new AmpacheApiException(albumsResponse.getError());
+                        AlbumsResponse albumsResponse = getRawRequest().getAlbums(AmpacheSession.INSTANCE.getHandshakeResponse().getAuth());
+                        if (albumsResponse.getError() != null)
+                            throw new AmpacheApiException(albumsResponse.getError());
 
-                    if (checkAndCache(FILENAME_ALBUMS, albumsResponse, albumsResponseCached)) {
-                        subscriber.onNext(albumsResponse.getAlbums());
-                    }
 
+                    subscriber.onNext(albumsResponse.getAlbums());
                     subscriber.onCompleted();
                 } catch (Exception e) {
                     subscriber.onError(e);
@@ -300,18 +288,11 @@ public enum AmpacheApi {
             @Override
             public void call(final Subscriber<? super List<Song>> subscriber) {
                 try {
-                    SongsResponse songsResponseCached = getCached(FILENAME_SONGS,SongsResponse.class);
-                    if (songsResponseCached!=null && songsResponseCached.getError()==null) {
-                        subscriber.onNext(songsResponseCached.getSongs());
-                    }
 
-                    SongsResponse songsResponse = getRawRequest().getSongs(AmpacheSession.INSTANCE.getHandshakeResponse().getAuth());
-                    if (songsResponse.getError()!=null) throw new AmpacheApiException(songsResponse.getError());
-
-                    if(checkAndCache(FILENAME_SONGS,songsResponse,songsResponseCached)){
-                        subscriber.onNext(songsResponse.getSongs());
-                    }
-
+                        SongsResponse songsResponse = getRawRequest().getSongs(AmpacheSession.INSTANCE.getHandshakeResponse().getAuth());
+                        if (songsResponse.getError() != null)
+                            throw new AmpacheApiException(songsResponse.getError());
+                    subscriber.onNext(songsResponse.getSongs());
                     subscriber.onCompleted();
                 } catch (Exception e) {
                     subscriber.onError(e);
@@ -359,6 +340,31 @@ public enum AmpacheApi {
                 try {
                     SongsResponse songssResponse =
                             getRawRequest().getSongsFromAlbum(AmpacheSession.INSTANCE.getHandshakeResponse().getAuth(), albumId);
+                    if (songssResponse.getError()!=null) throw new AmpacheApiException(songssResponse.getError());
+                    subscriber.onNext(songssResponse.getSongs());
+                    subscriber.onCompleted();
+                } catch (Exception e) {
+                    subscriber.onError(e);
+                }
+            }
+        })
+                .doOnError(doOnError)
+                .retry(9)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    /**
+     * get a list of songs from given album
+     */
+    public Observable<List<Song>> getSongsFromArtist(final String artistId) {
+        return Observable.create(new OnSubscribe<List<Song>>() {
+
+            @Override
+            public void call(final Subscriber<? super List<Song>> subscriber) {
+                try {
+                    SongsResponse songssResponse =
+                            getRawRequest().getArtistSongs(AmpacheSession.INSTANCE.getHandshakeResponse().getAuth(), artistId);
                     if (songssResponse.getError()!=null) throw new AmpacheApiException(songssResponse.getError());
                     subscriber.onNext(songssResponse.getSongs());
                     subscriber.onCompleted();
@@ -578,46 +584,6 @@ public enum AmpacheApi {
         AmpacheSession.INSTANCE.setAmpachePassword(null);
         AmpacheSession.INSTANCE.setAmpacheUrl(null);
         AmpacheSession.INSTANCE.setAmpacheUser(null);
-    }
-
-    /**
-     * get saved response
-     * @param filename  name of the saved file
-     * @param tClass    .class of the object to return
-     * @return          the saved file
-     */
-    private <T extends BaseResponse> T getCached(String filename, Class<T> tClass){
-        // return the cached first
-        String cachedJson = FileUtil.getInstance().readStringFile(mContext,filename);
-        T songsResponseCached = new Gson().fromJson(cachedJson,tClass);
-        return songsResponseCached;
-    }
-
-    /**
-     *
-     * @param filename
-     * @param response
-     * @param cachedResponse
-     * @return  true if the response and the cached response are not equals,
-     *          thus true the response has changed.
-     */
-    private boolean checkAndCache(String filename, BaseResponse response, BaseResponse cachedResponse) {
-        // if nothing is cached cache the response for the first time
-        // if the cached response and the new response are different cache the new one
-        if(cachedResponse==null || !cachedResponse.equals(response)) {
-            // cache the new song response
-            try {
-                FileUtil.getInstance().writeStringFile(mContext,filename,response.toJson());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return true;
-        }
-        return false;
-    }
-
-    public void cleanupFiles() {
-        // TODO remove created files on log out
     }
 
     Action1<Throwable> doOnError = new Action1<Throwable>() {
