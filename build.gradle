@@ -2,7 +2,6 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '25.0.0'
     lintOptions {
         abortOnError false
     }
@@ -28,22 +27,22 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    compile('org.simpleframework:simple-xml:2.7.1') {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestImplementation 'junit:junit:4.12'
+    implementation 'com.android.support:appcompat-v7:23.4.0'
+    implementation('org.simpleframework:simple-xml:2.7.1') {
         exclude module: 'stax'
         exclude module: 'stax-api'
         exclude module: 'xpp3'
     }
     // reactive java
-    compile 'com.netflix.rxjava:rxjava-android:0.20.7'
+    api 'com.netflix.rxjava:rxjava-android:0.20.7'
     //compile 'io.reactivex:rxjava:1.1.5'
     //compile 'io.reactivex:rxandroid:1.2.0'
-    compile 'com.google.code.gson:gson:2.4'
+    api 'com.google.code.gson:gson:2.8.5'
     // http
     //compile 'com.jakewharton.retrofit:retrofit1-okhttp3-client:1.0.2'
-    compile 'com.squareup.okhttp3:okhttp:3.1.2'
-    compile 'com.squareup.okhttp3:okhttp-urlconnection:3.1.2'
+    api 'com.squareup.okhttp3:okhttp:3.14.1'
+    api 'com.squareup.okhttp3:okhttp-urlconnection:3.14.1'
     // compile 'com.squareup.picasso:picasso:2.5.2'
 }
