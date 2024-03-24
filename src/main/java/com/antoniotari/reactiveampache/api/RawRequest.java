@@ -1,8 +1,8 @@
 package com.antoniotari.reactiveampache.api;
 
-import android.support.annotation.IntDef;
-import android.support.annotation.NonNull;
-import android.support.annotation.StringDef;
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.StringDef;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -18,7 +18,6 @@ import com.antoniotari.reactiveampache.models.ArtistsResponse;
 import com.antoniotari.reactiveampache.models.HandshakeResponse;
 import com.antoniotari.reactiveampache.models.PingResponse;
 import com.antoniotari.reactiveampache.models.PlaylistsResponse;
-import com.antoniotari.reactiveampache.models.Song;
 import com.antoniotari.reactiveampache.models.SongsResponse;
 import com.antoniotari.reactiveampache.models.TagsResponse;
 import com.antoniotari.reactiveampache.utils.AmpacheUtils;
