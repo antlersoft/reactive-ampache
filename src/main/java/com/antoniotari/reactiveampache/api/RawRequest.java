@@ -341,7 +341,7 @@ public class RawRequest {
 
             SSLContext sslContext = SSLContext.getInstance("SSL");
             sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-            clientBuilder.sslSocketFactory(sslContext.getSocketFactory());
+            clientBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
 
             HostnameVerifier hostnameVerifier = new HostnameVerifier() {
                 @Override
