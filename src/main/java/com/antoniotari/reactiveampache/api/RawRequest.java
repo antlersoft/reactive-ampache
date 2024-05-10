@@ -18,6 +18,7 @@ import com.antoniotari.reactiveampache.models.ArtistsResponse;
 import com.antoniotari.reactiveampache.models.HandshakeResponse;
 import com.antoniotari.reactiveampache.models.PingResponse;
 import com.antoniotari.reactiveampache.models.PlaylistsResponse;
+import com.antoniotari.reactiveampache.models.RateResponse;
 import com.antoniotari.reactiveampache.models.SongsResponse;
 import com.antoniotari.reactiveampache.models.TagsResponse;
 import com.antoniotari.reactiveampache.utils.AmpacheUtils;
@@ -308,6 +309,14 @@ public class RawRequest {
                 "&action=playlist_remove_song";
         final String respStr = getRequest(playlistQuery, Timeout.SHORT_TIMEOUT);
         return new SerializeUtils().fromXml(respStr, SongsResponse.class);
+    }
+
+    public RateResponse rateSong(final String auth, final String songId, final int rating) throws Exception {
+        String rateQuery = "auth=" + auth +
+                "&action=rate&type=song&id=" + songId +
+                "&rating=" + rating;
+        final String respStr = getRequest(rateQuery, Timeout.SHORT_TIMEOUT);
+        return new SerializeUtils().fromXml(respStr, RateResponse.class);
     }
 
     public PingResponse ping(final String auth) throws Exception {

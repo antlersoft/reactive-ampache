@@ -36,6 +36,7 @@ import com.antoniotari.reactiveampache.models.HandshakeResponse;
 import com.antoniotari.reactiveampache.models.PingResponse;
 import com.antoniotari.reactiveampache.models.Playlist;
 import com.antoniotari.reactiveampache.models.PlaylistsResponse;
+import com.antoniotari.reactiveampache.models.RateResponse;
 import com.antoniotari.reactiveampache.models.Song;
 import com.antoniotari.reactiveampache.models.SongsResponse;
 import com.antoniotari.reactiveampache.utils.FileUtil;
@@ -450,6 +451,25 @@ public enum AmpacheApi {
         })
                 .doOnError(doOnError)
                 .retry(9)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Observable<String> rateSong(final String songId, int rating) {
+        return Observable.create(new OnSubscribe<String>() {
+            @Override
+            public void call(Subscriber<? super String> subscriber) {
+                try {
+                    RateResponse response =
+                            getRawRequest().rateSong(AmpacheSession.INSTANCE.getHandshakeResponse().getAuth(), songId, rating);
+                    subscriber.onNext(response.getResponseText());
+                    subscriber.onCompleted();
+                } catch (Exception e) {
+                    subscriber.onError(e);
+                }
+            }
+        }).doOnError(doOnError)
+                .retry(2)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
