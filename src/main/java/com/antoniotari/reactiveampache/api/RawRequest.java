@@ -319,6 +319,15 @@ public class RawRequest {
         return new SerializeUtils().fromXml(respStr, RateResponse.class);
     }
 
+    public RateResponse addOrRemoveSongTag(final String auth, final String songId, final String tag,
+                                          final boolean removeTag) throws Exception {
+        String query = "auth=" + auth +
+                "&action=addorremovetag&type=song&id=" + songId +
+                "&tag=" + tag + "&remove="+(removeTag ? "1" : "0");
+        final String respStr = getRequest(query, Timeout.SHORT_TIMEOUT);
+        return new SerializeUtils().fromXml(respStr, RateResponse.class);
+    }
+
     public PingResponse ping(final String auth) throws Exception {
         String pingQuery = "auth=" + auth + "&action=ping" +"&version=350001";
         final String respStr = getRequest(pingQuery, Timeout.SHORT_TIMEOUT);

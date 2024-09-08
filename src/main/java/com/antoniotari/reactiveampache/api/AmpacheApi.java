@@ -474,6 +474,25 @@ public enum AmpacheApi {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    public Observable<String> addOrRemoveSongTag(final String songId, String tag, boolean remove) {
+        return Observable.create(new OnSubscribe<String>() {
+                    @Override
+                    public void call(Subscriber<? super String> subscriber) {
+                        try {
+                            RateResponse response =
+                                    getRawRequest().addOrRemoveSongTag(AmpacheSession.INSTANCE.getHandshakeResponse().getAuth(), songId, tag, remove);
+                            subscriber.onNext(response.getResponseText());
+                            subscriber.onCompleted();
+                        } catch (Exception e) {
+                            subscriber.onError(e);
+                        }
+                    }
+                }).doOnError(doOnError)
+                .retry(2)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     public Observable<Song> getSong(final String songId) {
         return Observable.create(new OnSubscribe<Song>() {
             @Override
